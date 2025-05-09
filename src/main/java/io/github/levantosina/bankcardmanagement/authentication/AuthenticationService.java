@@ -1,5 +1,6 @@
 package io.github.levantosina.bankcardmanagement.authentication;
 
+import io.github.levantosina.bankcardmanagement.exception.BadCredentialsException;
 import io.github.levantosina.bankcardmanagement.jwt.JwtUtil;
 import io.github.levantosina.bankcardmanagement.model.OwnDetails;
 import io.github.levantosina.bankcardmanagement.model.Role;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,25 +51,31 @@ public class AuthenticationService {
     public AuthenticationResponse login(AuthenticationRequest authenticationRequest) {
         log.info("Attempting to authenticate user with username: {}", authenticationRequest.userName());
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.userName(),
-                        authenticationRequest.password()
-                )
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.userName(),
+                            authenticationRequest.password()
+                    )
+            );
 
-        OwnDetails ownUserDetails = (OwnDetails) authentication.getPrincipal();
-        UserAdminEntity userAdminEntity = ownUserDetails.getUserEntity();
+            OwnDetails ownUserDetails = (OwnDetails) authentication.getPrincipal();
+            UserAdminEntity userAdminEntity = ownUserDetails.getUserEntity();
 
-        log.info("Authenticated user: {}", userAdminEntity.getEmail());
+            log.info("Authenticated user: {}", userAdminEntity.getEmail());
 
-        Role role = userAdminEntity.getRole();
-        Long userId = userAdminEntity.getUserId();
+            Role role = userAdminEntity.getRole();
+            Long userId = userAdminEntity.getUserId();
 
-        String token = jwtUtil.issueToken(userAdminEntity.getUsername(), userId, role);
+            String token = jwtUtil.issueToken(userAdminEntity.getUsername(), userId, role);
 
-        log.info("Generated token for user {} with role {}: {}", userAdminEntity.getUsername(), role, token);
+            log.info("Generated token for user {} with role {}: {}", userAdminEntity.getUsername(), role, token);
 
-        return new AuthenticationResponse(token);
+            return new AuthenticationResponse(token);
+
+        } catch (AuthenticationException ex) {
+            log.warn("Authentication failed for user {}: {}", authenticationRequest.userName(), ex.getMessage());
+            throw new BadCredentialsException("Invalid username or password");
+        }
     }
 }
