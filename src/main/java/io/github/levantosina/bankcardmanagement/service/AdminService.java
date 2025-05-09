@@ -117,36 +117,6 @@ public class AdminService {
                 card.getCardStatus()
         );
     }
-
-    public void createCard(CardRegistrationRequest cardRegistrationRequest){
-
-        UserAdminEntity userAdminEntity= userAdminRepository.findById(cardRegistrationRequest.userId())
-                .orElseThrow(()-> new ResourceNotFoundException("User not found with id [%s]"
-                        .formatted(cardRegistrationRequest.userId())));
-
-        CardStatus cardStatus;
-        if (cardRegistrationRequest.expiryDate().isBefore(YearMonth.now())) {
-            cardStatus = CardStatus.EXPIRED;
-        } else {
-            cardStatus = CardStatus.ACTIVE;
-        }
-
-        BigDecimal balance = cardRegistrationRequest.balance();
-        if (balance == null) {
-            balance = new BigDecimal("0.00");
-        }
-
-        CardEntity card= CardEntity.builder()
-                .cardHolderName(cardRegistrationRequest.cardHolderName())
-                .encryptedCardNumber(aesService.encrypt(cardRegistrationRequest.encryptedCardNumber()))
-                .expiryDate(cardRegistrationRequest.expiryDate())
-                .balance(balance)
-                .cardStatus(cardStatus)
-                .user(userAdminEntity)
-                .build();
-
-        cardRepository.save(card);
-    }
     @Transactional
     public CardEntity blockCard(Long cardId) {
 
