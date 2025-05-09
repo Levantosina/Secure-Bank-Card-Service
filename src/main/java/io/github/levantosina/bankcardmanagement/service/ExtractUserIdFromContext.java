@@ -1,9 +1,11 @@
 package io.github.levantosina.bankcardmanagement.service;
 
+import io.github.levantosina.bankcardmanagement.model.OwnDetails;
 import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -19,13 +21,11 @@ public class ExtractUserIdFromContext {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof OwnDetails ownDetails)) {
             throw new AccessDeniedException("No authenticated user found");
         }
-        String authenticatedEmail = userDetails.getUsername();
 
-        UserAdminEntity authenticatedUser = userAdminRepository.findByEmail(authenticatedEmail)
-                .orElseThrow(() -> new AccessDeniedException("Authenticated user not found"));
+        UserAdminEntity authenticatedUser = ownDetails.getUserEntity();
 
         return authenticatedUser.getUserId();
     }
