@@ -1,12 +1,11 @@
 package io.github.levantosina.bankcardmanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 
 @Entity
@@ -33,6 +32,10 @@ public class CardEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "card_status")
     private CardStatus cardStatus;
+    @Column(name="block_requested")
+    private boolean blockRequest=false;
+    @Column(name = "block_requested_at")
+    private LocalDateTime blockRequestedAt;
     @ManyToOne
     @JoinColumn(name = "user_id",nullable = false)
     @JsonBackReference
