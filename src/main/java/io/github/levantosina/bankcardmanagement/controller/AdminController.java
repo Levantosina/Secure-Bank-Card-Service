@@ -86,6 +86,16 @@ public class AdminController {
         CardEntity blockedCard = adminService.blockCard(cardId);
         return ResponseEntity.ok(blockedCard);
     }
+    @GetMapping("/card/block-requests")
+    public List<CardEntity> getBlockRequests() {
+        return adminService.getPendingBlockRequests();
+    }
+
+    @PostMapping("/card/approve-block/{cardId}")
+    public ResponseEntity<?> approveBlock(@PathVariable Long cardId) {
+        adminService.approveBlockRequest(cardId);
+        return ResponseEntity.ok("Card blocked successfully");
+    }
 
     @PutMapping("/card/activate/{cardId}")
     public ResponseEntity<CardEntity> activateCard(@PathVariable Long cardId,

@@ -5,21 +5,18 @@ import io.github.levantosina.bankcardmanagement.dto.UserAdminDTO;
 import io.github.levantosina.bankcardmanagement.exception.CardStatusException;
 import io.github.levantosina.bankcardmanagement.exception.RequestValidationException;
 import io.github.levantosina.bankcardmanagement.exception.ResourceNotFoundException;
-import io.github.levantosina.bankcardmanagement.mapper.CardDTOMapper;
 import io.github.levantosina.bankcardmanagement.mapper.UserAdminDTOMapper;
 import io.github.levantosina.bankcardmanagement.model.CardEntity;
 import io.github.levantosina.bankcardmanagement.model.CardStatus;
 import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.CardRepository;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
-import io.github.levantosina.bankcardmanagement.request.CardRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.UserUpdateRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,6 +93,7 @@ public class AdminService {
                             card.getExpiryDate(),
                             card.getBalance(),
                             card.getCardStatus()
+
                     );
                 })
                 .collect(Collectors.toList());
@@ -115,7 +113,12 @@ public class AdminService {
                 card.getExpiryDate(),
                 card.getBalance(),
                 card.getCardStatus()
+
         );
+    }
+    @Transactional
+    public List<CardEntity> getPendingBlockRequests() {
+        return cardRepository.findByBlockRequestedTrueAndCardStatusNot(CardStatus.BLOCKED);
     }
     @Transactional
     public CardEntity blockCard(Long cardId) {
@@ -129,6 +132,20 @@ public class AdminService {
         card.setCardStatus(CardStatus.BLOCKED);
 
         return cardRepository.save(card);
+    }
+
+    @Transactional
+    public void approveBlockRequest(Long cardId) {
+
+        CardEntity card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card with id [%s] not found".formatted(cardId)));
+
+        if(!card.isBlockRequest()){
+            throw new CardStatusException("Card with id [%s] already blocked" .formatted(cardId));
+        }
+        card.setCardStatus(CardStatus.BLOCKED);
+        card.setBlockRequest(false);
+        cardRepository.save(card);
     }
 
     @Transactional
