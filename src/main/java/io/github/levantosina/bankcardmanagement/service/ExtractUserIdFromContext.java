@@ -15,7 +15,6 @@ import java.nio.file.AccessDeniedException;
 @Component
 @AllArgsConstructor
 public class ExtractUserIdFromContext {
-    private final UserAdminRepository userAdminRepository;
 
     public Long extractUserIdFromContext() throws AccessDeniedException {
 

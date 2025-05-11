@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 
 @Service
@@ -115,8 +116,12 @@ public class UserService {
         if (card.getCardStatus() == CardStatus.BLOCKED) {
             throw new IllegalStateException("Card is already blocked");
         }
+        if (card.isBlockRequest()) {
+            throw new IllegalStateException("Block request already submitted");
+        }
 
-        card.setCardStatus(CardStatus.BLOCKED);
+        card.setBlockRequest(true);
+        card.setBlockRequestedAt(LocalDateTime.now());
         cardRepository.save(card);
     }
 

@@ -18,7 +18,6 @@ public class OwnUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        //System.out.println("Authorization for " + user.getEmail() + ", Role: " + user.getRole());
-        return new OwnDetails(user);
+          return new OwnDetails(user);
     }
 }

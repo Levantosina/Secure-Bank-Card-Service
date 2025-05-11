@@ -18,18 +18,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.math.BigDecimal;
 import java.time.YearMonth;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
 
 class AdminServiceTest {
 
@@ -143,7 +138,7 @@ class AdminServiceTest {
         CardEntity card2 = new CardEntity();
         card2.setCardHolderName("Cardholder 2");
         card2.setEncryptedCardNumber("encryptedCard2");
-        card2.setExpiryDate(YearMonth.of(2026, 5));
+        card2.setExpiryDate(YearMonth.of(2027, 5));
         card2.setBalance(new BigDecimal("100.00"));
         card2.setCardStatus(CardStatus.BLOCKED);
 
@@ -157,7 +152,7 @@ class AdminServiceTest {
 
         List<CardDTO> expected = List.of(
                 new CardDTO("Cardholder 1", "**** **** **** 1234", YearMonth.of(2025, 12), new BigDecimal("50.00"), CardStatus.ACTIVE),
-                new CardDTO("Cardholder 2", "**** **** **** 5678", YearMonth.of(2026, 5), new BigDecimal("100.00"), CardStatus.BLOCKED)
+                new CardDTO("Cardholder 2", "**** **** **** 5678", YearMonth.of(2027, 5), new BigDecimal("100.00"), CardStatus.BLOCKED)
         );
 
         List<CardDTO> result = underTest.findAllCards();
