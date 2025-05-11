@@ -1,18 +1,8 @@
-server:
-  port: 8080
-cors:
-  allowed-origins: "*"
-  allowed-methods: "*"
-  allowed-headers: "*"
-  exposed-headers: "*"
-encryption:
-  aes-key: 1234567890123456
-
 spring:
   datasource:
-    password: password
-    url: jdbc:postgresql://localhost:5332/cardManagement
+    url: jdbc:postgresql://postgres:5432/cardManagement
     username: levantos
+    password: password
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -28,6 +18,6 @@ spring:
       boot:
         allow_jdbc_metadata_access: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.yml
-
