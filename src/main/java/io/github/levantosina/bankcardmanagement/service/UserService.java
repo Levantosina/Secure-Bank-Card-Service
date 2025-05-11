@@ -7,7 +7,7 @@ import io.github.levantosina.bankcardmanagement.model.CardStatus;
 import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.CardRepository;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
-import io.github.levantosina.bankcardmanagement.request.CardRegistrationRequest;
+import io.github.levantosina.bankcardmanagement.request.UserCardRegistrationRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -61,21 +60,13 @@ public class UserService {
 
 
     @Transactional
-    public void createCard(CardRegistrationRequest cardRegistrationRequest) throws AccessDeniedException {
+    public void createCard(UserCardRegistrationRequest cardRegistrationRequest) throws AccessDeniedException {
 
         Long authenticatedUserId = extractUserIdFromContext.extractUserIdFromContext();
-
-        UserAdminEntity userAdminEntity;
-
-        if (isAdmin()) {
-            userAdminEntity = userAdminRepository.findById(cardRegistrationRequest.userId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id [%s]"
-                            .formatted(cardRegistrationRequest.userId())));
-        } else {
-            userAdminEntity = userAdminRepository.findById(authenticatedUserId)
+        UserAdminEntity userAdminEntity = userAdminRepository.findById(authenticatedUserId)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found with id [%s]"
                             .formatted(authenticatedUserId)));
-        }
+
         CardStatus cardStatus = cardRegistrationRequest.expiryDate().isBefore(YearMonth.now())
                 ? CardStatus.EXPIRED
                 : CardStatus.ACTIVE;

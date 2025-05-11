@@ -6,7 +6,7 @@ import io.github.levantosina.bankcardmanagement.model.CardStatus;
 import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.CardRepository;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
-import io.github.levantosina.bankcardmanagement.request.CardRegistrationRequest;
+import io.github.levantosina.bankcardmanagement.request.UserCardRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.service.AESService;
 import io.github.levantosina.bankcardmanagement.service.ExtractUserIdFromContext;
 import io.github.levantosina.bankcardmanagement.service.UserService;
@@ -82,19 +82,18 @@ class UserServiceTest {
     void createCard() throws AccessDeniedException {
 
         Long userId = 1L;
-        CardRegistrationRequest request = new CardRegistrationRequest(
+        UserCardRegistrationRequest request = new UserCardRegistrationRequest(
                 "Test User",
                 "1234123412341234",
                 YearMonth.of(2026, 11),
-                new BigDecimal("1000.00"),
-                null
+                new BigDecimal("1000.00")
+
         );
 
         UserAdminEntity user = new UserAdminEntity();
         user.setUserId(userId);
 
         Mockito.when(extractUserIdFromContext.extractUserIdFromContext()).thenReturn(userId);
-        Mockito.when(underTest.isAdmin()).thenReturn(false);
         Mockito.when(userAdminRepository.findById(userId)).thenReturn(Optional.of(user));
         Mockito.when(aesService.encrypt("1234123412341234")).thenReturn("password123");
 

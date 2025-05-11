@@ -8,17 +8,18 @@ import io.github.levantosina.bankcardmanagement.model.CardStatus;
 import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.CardRepository;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
+import io.github.levantosina.bankcardmanagement.request.AdminCardRegistrationRequest;
+import io.github.levantosina.bankcardmanagement.request.UserCardRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.UserUpdateRequest;
 import io.github.levantosina.bankcardmanagement.service.AESService;
 import io.github.levantosina.bankcardmanagement.service.AdminService;
+import io.github.levantosina.bankcardmanagement.service.ExtractUserIdFromContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.math.BigDecimal;
+import java.nio.file.AccessDeniedException;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,9 @@ class AdminServiceTest {
 
     @InjectMocks
     private AdminService underTest;
+
+    @Mock
+    private ExtractUserIdFromContext extractUserIdFromContext;
 
     @BeforeEach
     void setUp() {
@@ -180,6 +184,41 @@ class AdminServiceTest {
         CardDTO result = underTest.findCardById(cardId);
         assertEquals(expected, result);
     }
+
+    @Test
+    void createCard() throws AccessDeniedException {
+
+        Long userId = 1L;
+        AdminCardRegistrationRequest request = new AdminCardRegistrationRequest(
+                "Test User",
+                "1234123412341234",
+                YearMonth.of(2026, 11),
+                new BigDecimal("1000.00"),
+                userId
+
+        );
+
+        UserAdminEntity user = new UserAdminEntity();
+        user.setUserId(userId);
+
+        Mockito.when(extractUserIdFromContext.extractUserIdFromContext()).thenReturn(userId);
+        Mockito.when(userAdminRepository.findById(userId)).thenReturn(Optional.of(user));
+        Mockito.when(aesService.encrypt("1234123412341234")).thenReturn("password123");
+
+        underTest.createCard(request);
+
+        ArgumentCaptor<CardEntity> cardCaptor = ArgumentCaptor.forClass(CardEntity.class);
+        Mockito.verify(cardRepository).save(cardCaptor.capture());
+
+        CardEntity savedCard = cardCaptor.getValue();
+        assertEquals("Test User", savedCard.getCardHolderName());
+        assertEquals("password123", savedCard.getEncryptedCardNumber());
+        assertEquals(YearMonth.of(2026, 11), savedCard.getExpiryDate());
+        assertEquals(new BigDecimal("1000.00"), savedCard.getBalance());
+        assertEquals(CardStatus.ACTIVE, savedCard.getCardStatus());
+        assertEquals(user, savedCard.getUser());
+    }
+
     @Test
     void blockCard(){
         Long cardId = 2L;

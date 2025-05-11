@@ -1,6 +1,6 @@
 package io.github.levantosina.bankcardmanagement.controller;
 
-import io.github.levantosina.bankcardmanagement.request.CardRegistrationRequest;
+import io.github.levantosina.bankcardmanagement.request.UserCardRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.CardTransferRequest;
 import io.github.levantosina.bankcardmanagement.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping("/card/create")
-    public ResponseEntity<?> createCard(@RequestBody @Valid CardRegistrationRequest cardRegistrationRequest) throws AccessDeniedException {
+    public ResponseEntity<?> createCard(@RequestBody @Valid UserCardRegistrationRequest cardRegistrationRequest) throws AccessDeniedException {
         userService.createCard(cardRegistrationRequest);
         return ResponseEntity.ok("Card created successfully");
     }

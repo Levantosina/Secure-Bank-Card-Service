@@ -5,11 +5,10 @@ import io.github.levantosina.bankcardmanagement.authentication.AuthenticationSer
 import io.github.levantosina.bankcardmanagement.dto.CardDTO;
 import io.github.levantosina.bankcardmanagement.dto.UserAdminDTO;
 import io.github.levantosina.bankcardmanagement.model.CardEntity;
-import io.github.levantosina.bankcardmanagement.request.CardRegistrationRequest;
+import io.github.levantosina.bankcardmanagement.request.AdminCardRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.UserRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.UserUpdateRequest;
 import io.github.levantosina.bankcardmanagement.service.AdminService;
-import io.github.levantosina.bankcardmanagement.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -27,7 +26,6 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
-    private final UserService userService;
     private final AuthenticationService authenticationService;
 
 ///////////////////////// USER PART ////////////////////////////
@@ -76,8 +74,8 @@ public class AdminController {
     }
 
     @PostMapping("/card/create")
-    public ResponseEntity<?> createCard(@RequestBody @Valid CardRegistrationRequest cardRegistrationRequest) throws AccessDeniedException {
-        userService.createCard(cardRegistrationRequest);
+    public ResponseEntity<?> createCard(@RequestBody @Valid AdminCardRegistrationRequest adminCardRegistrationRequest) throws AccessDeniedException {
+        adminService.createCard(adminCardRegistrationRequest);
         return ResponseEntity.ok("Card created successfully");
     }
 

@@ -11,12 +11,15 @@ import io.github.levantosina.bankcardmanagement.model.CardStatus;
 import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.CardRepository;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
+import io.github.levantosina.bankcardmanagement.request.AdminCardRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.UserUpdateRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.nio.file.AccessDeniedException;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +33,7 @@ public class AdminService {
     private final UserAdminDTOMapper userDTOMapper;
     private final PasswordEncoder passwordEncoder;
     private final AESService aesService;
+    private final ExtractUserIdFromContext extractUserIdFromContext;
 
     @Transactional
     public List<UserAdminDTO> findAllUsers() {
@@ -79,7 +83,30 @@ public class AdminService {
         userAdminRepository.deleteUserAdminByUserId(userId);
     }
 
+    @Transactional
+    public void createCard(AdminCardRegistrationRequest adminCardRegistrationRequest) throws AccessDeniedException {
+        Long authenticatedUserId = extractUserIdFromContext.extractUserIdFromContext();
 
+        UserAdminEntity userAdminEntity = userAdminRepository.findById(authenticatedUserId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id [%s]"
+                            .formatted(authenticatedUserId)));
+
+        CardStatus cardStatus = adminCardRegistrationRequest.expiryDate().isBefore(YearMonth.now())
+                ? CardStatus.EXPIRED
+                : CardStatus.ACTIVE;
+        BigDecimal balance = adminCardRegistrationRequest.balance() != null
+                ? adminCardRegistrationRequest.balance()
+                : BigDecimal.ZERO;
+        CardEntity card = CardEntity.builder()
+                .cardHolderName(adminCardRegistrationRequest.cardHolderName())
+                .encryptedCardNumber(aesService.encrypt(adminCardRegistrationRequest.encryptedCardNumber()))
+                .expiryDate(adminCardRegistrationRequest.expiryDate())
+                .balance(balance)
+                .cardStatus(cardStatus)
+                .user(userAdminEntity)
+                .build();
+        cardRepository.save(card);
+    }
     @Transactional
     public List<CardDTO> findAllCards() {
         return cardRepository.findAll()

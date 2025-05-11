@@ -6,6 +6,8 @@ import io.github.levantosina.bankcardmanagement.model.OwnDetails;
 import io.github.levantosina.bankcardmanagement.model.Role;
 import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
+import io.github.levantosina.bankcardmanagement.request.AdminRegistrationRequest;
+import io.github.levantosina.bankcardmanagement.request.RegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.UserRegistrationRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,17 +30,19 @@ public class AuthenticationService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
-    public void createUser(UserRegistrationRequest userRegistrationRequest,boolean isAdminRequest) {
-
-        userAdminRepository.existsUserAdminByEmail(userRegistrationRequest.email());
+    public void createUser(RegistrationRequest registrationRequest, boolean isAdminRequest) {
+        if (userAdminRepository.existsUserAdminByEmail(registrationRequest.email())) {
+            throw new IllegalArgumentException("User already exists");
+        }
 
         UserAdminEntity userAdminEntity = new UserAdminEntity();
-        userAdminEntity.setEmail(userRegistrationRequest.email());
-        userAdminEntity.setPassword(passwordEncoder.encode(userRegistrationRequest.password()));
-        if (isAdminRequest) {
-            Role role = userRegistrationRequest.role();
+        userAdminEntity.setEmail(registrationRequest.email());
+        userAdminEntity.setPassword(passwordEncoder.encode(registrationRequest.password()));
+
+        if (isAdminRequest && registrationRequest instanceof AdminRegistrationRequest adminReq) {
+            Role role = adminReq.role();
             if (!List.of(Role.ROLE_USER, Role.ROLE_ADMIN).contains(role)) {
-                throw new IllegalArgumentException("Invalid role: "+ role.getRole());
+                throw new IllegalArgumentException("Invalid role: " + role.getRole());
             }
             userAdminEntity.setRole(role);
         } else {
