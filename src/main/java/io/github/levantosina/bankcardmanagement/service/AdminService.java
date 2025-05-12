@@ -56,6 +56,12 @@ public class AdminService {
         UserAdminEntity user = userAdminRepository.findUserAdminByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User with [%s] not found".formatted(userId)));
 
+        if (userUpdateRequest.email() != null && !userUpdateRequest.email().equals(user.getEmail())) {
+            if (userAdminRepository.existsByEmail(userUpdateRequest.email())) {
+                throw new IllegalArgumentException("Email address is already taken.");
+            }
+            user.setEmail(userUpdateRequest.email());
+        }
         boolean changes = false;
 
         if (userUpdateRequest.email() != null && !userUpdateRequest.email().equals(user.getEmail())) {
@@ -91,6 +97,12 @@ public class AdminService {
                     .orElseThrow(() -> new ResourceNotFoundException("User not found with id [%s]"
                             .formatted(authenticatedUserId)));
 
+        String encryptedCardNumber = aesService.encrypt(adminCardRegistrationRequest.encryptedCardNumber());
+
+        if (cardRepository.existsByEncryptedCardNumber(encryptedCardNumber)) {
+            throw new IllegalArgumentException("Card with this number already exists");
+        }
+
         CardStatus cardStatus = adminCardRegistrationRequest.expiryDate().isBefore(YearMonth.now())
                 ? CardStatus.EXPIRED
                 : CardStatus.ACTIVE;
@@ -99,7 +111,7 @@ public class AdminService {
                 : BigDecimal.ZERO;
         CardEntity card = CardEntity.builder()
                 .cardHolderName(adminCardRegistrationRequest.cardHolderName())
-                .encryptedCardNumber(aesService.encrypt(adminCardRegistrationRequest.encryptedCardNumber()))
+                .encryptedCardNumber(encryptedCardNumber)
                 .expiryDate(adminCardRegistrationRequest.expiryDate())
                 .balance(balance)
                 .cardStatus(cardStatus)
