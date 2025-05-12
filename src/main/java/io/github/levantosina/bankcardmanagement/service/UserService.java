@@ -64,26 +64,35 @@ public class UserService {
 
         Long authenticatedUserId = extractUserIdFromContext.extractUserIdFromContext();
         UserAdminEntity userAdminEntity = userAdminRepository.findById(authenticatedUserId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id [%s]"
-                            .formatted(authenticatedUserId)));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id [%s]"
+                        .formatted(authenticatedUserId)));
+
+
+        String encryptedCardNumber = aesService.encrypt(cardRegistrationRequest.encryptedCardNumber());
+
+        if (cardRepository.existsByEncryptedCardNumber(encryptedCardNumber)) {
+            throw new IllegalArgumentException("Card with this number already exists");
+        }
 
         CardStatus cardStatus = cardRegistrationRequest.expiryDate().isBefore(YearMonth.now())
                 ? CardStatus.EXPIRED
                 : CardStatus.ACTIVE;
+
         BigDecimal balance = cardRegistrationRequest.balance() != null
                 ? cardRegistrationRequest.balance()
                 : BigDecimal.ZERO;
+
         CardEntity card = CardEntity.builder()
                 .cardHolderName(cardRegistrationRequest.cardHolderName())
-                .encryptedCardNumber(aesService.encrypt(cardRegistrationRequest.encryptedCardNumber()))
+                .encryptedCardNumber(encryptedCardNumber)
                 .expiryDate(cardRegistrationRequest.expiryDate())
                 .balance(balance)
                 .cardStatus(cardStatus)
                 .user(userAdminEntity)
                 .build();
+
         cardRepository.save(card);
     }
-
 
 
 
