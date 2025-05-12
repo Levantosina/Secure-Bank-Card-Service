@@ -49,9 +49,10 @@ public class AdminController {
         return ResponseEntity.ok("Create user successfully");
     }
 
-    @PutMapping("/user/{userId}")
-    public ResponseEntity<?>  updateUser( @Valid @PathVariable("userId") Long userId,@RequestBody UserUpdateRequest userUpdateRequest){
-       return ResponseEntity.ok(adminService.updateUserAdmin(userId,userUpdateRequest));
+    @PutMapping("/user/update/{userId}")
+    public ResponseEntity<?> updateUser(@PathVariable("userId") Long userId,
+            @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+        return ResponseEntity.ok(adminService.updateUserAdmin(userId, userUpdateRequest));
     }
 
     @DeleteMapping("/user/delete/{userId}")
