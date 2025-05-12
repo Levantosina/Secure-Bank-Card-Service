@@ -11,5 +11,6 @@ public interface UserAdminRepository extends JpaRepository<UserAdminEntity, Long
     boolean existsUserAdminByUserId(Long userId);
     Optional<UserAdminEntity>findUserAdminByUserId(Long userId);
     void deleteUserAdminByUserId(Long userId);
+    boolean existsByEmail(String email);
 
 }
