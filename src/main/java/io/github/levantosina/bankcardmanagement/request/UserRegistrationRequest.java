@@ -4,7 +4,8 @@ import jakarta.validation.constraints.*;
 
 public record UserRegistrationRequest(
         @NotBlank(message = "Email cannot be empty")
-        @Email(message = "Invalid email format")   @Pattern(
+        @Email(message = "Invalid email format")
+        @Pattern(
                 regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$",
                 message = "Invalid email format"
         )String email,
