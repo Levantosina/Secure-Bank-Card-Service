@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -23,6 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("api/v1/admin/card-management")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 public class AdminController {
 
     private final AdminService adminService;
@@ -42,13 +44,13 @@ public class AdminController {
     }
 
     @PostMapping("/user/register")
-    public ResponseEntity<?> register(@RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationRequest request) {
         authenticationService.createUser(request, true);
         return ResponseEntity.ok("Create user successfully");
     }
 
     @PutMapping("/user/{userId}")
-    public ResponseEntity<?>  updateUser(@PathVariable("userId") Long userId,@RequestBody UserUpdateRequest userUpdateRequest){
+    public ResponseEntity<?>  updateUser( @Valid @PathVariable("userId") Long userId,@RequestBody UserUpdateRequest userUpdateRequest){
        return ResponseEntity.ok(adminService.updateUserAdmin(userId,userUpdateRequest));
     }
 

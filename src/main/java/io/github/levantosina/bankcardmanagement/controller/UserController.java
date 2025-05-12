@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -15,6 +16,7 @@ import java.nio.file.AccessDeniedException;
 @AllArgsConstructor
 @RequestMapping("api/v1/user/card-management")
 @SecurityRequirement(name = "bearerAuth")
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -40,7 +42,7 @@ public class UserController {
         return ResponseEntity.ok("Card block request submitted");
     }
     @PostMapping("/cards/transfer")
-    public ResponseEntity<String> transfer(@RequestBody CardTransferRequest request) {
+    public ResponseEntity<String> transfer(@Valid  @RequestBody CardTransferRequest request) {
         userService.transferBalance(request.fromCardId(), request.toCardId(), request.amount());
         return ResponseEntity.ok("Transfer request submitted");
     }

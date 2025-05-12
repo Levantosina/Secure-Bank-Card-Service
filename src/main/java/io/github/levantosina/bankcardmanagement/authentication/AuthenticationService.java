@@ -8,7 +8,8 @@ import io.github.levantosina.bankcardmanagement.model.UserAdminEntity;
 import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
 import io.github.levantosina.bankcardmanagement.request.AdminRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.RegistrationRequest;
-import io.github.levantosina.bankcardmanagement.request.UserRegistrationRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -29,8 +31,15 @@ public class AuthenticationService {
     private final UserAdminRepository userAdminRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final Validator validator;
 
     public void createUser(RegistrationRequest registrationRequest, boolean isAdminRequest) {
+
+        Set<ConstraintViolation<RegistrationRequest>> violations = validator.validate(registrationRequest);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Validation failed: " + violations);
+        }
+
         if (userAdminRepository.existsUserAdminByEmail(registrationRequest.email())) {
             throw new IllegalArgumentException("User already exists");
         }
