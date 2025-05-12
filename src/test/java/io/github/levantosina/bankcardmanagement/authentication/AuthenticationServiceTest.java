@@ -9,6 +9,7 @@ import io.github.levantosina.bankcardmanagement.repository.UserAdminRepository;
 import io.github.levantosina.bankcardmanagement.request.AdminRegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.RegistrationRequest;
 import io.github.levantosina.bankcardmanagement.request.UserRegistrationRequest;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +33,8 @@ class AuthenticationServiceTest {
     private JwtUtil jwtUtil;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private Validator validator;
 
     @InjectMocks
     private AuthenticationService authenticationService;
