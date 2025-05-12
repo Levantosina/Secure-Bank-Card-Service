@@ -17,5 +17,6 @@ public interface CardRepository extends JpaRepository<CardEntity, Long> {
     Page<CardEntity> findByUserUserIdAndCardHolderNameContaining(Long userId, String cardHolderName, Pageable pageable);
     @Query("SELECT c FROM CardEntity c WHERE c.blockRequest = true AND c.cardStatus <> 'BLOCKED'")
     List<CardEntity> findByBlockRequestedTrueAndCardStatusNot(CardStatus status);
+    boolean existsByEncryptedCardNumber(String cardHolderName);
 
 }
